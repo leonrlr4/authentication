@@ -2,6 +2,8 @@ const router = require('express').Router();
 const User = require('../models/User');
 const { registerValidation, loginValidation } = require('../validation');
 const bcrypt = require ('bcryptjs');
+const jwt = require('jsonwebtoken');
+const postRoute = require('../routes/post');
 
 router.post('/register', async (req, res)=>{
 
@@ -49,16 +51,20 @@ router.post('/login', async (req, res)=>{
 
         // console.log('whats happend')
         //checking if the user name is already in the database
-        const userName = await User.findOne({name: req.body.name});
-        if (!userName) return res.status(400).send('user name not found');
+        const user = await User.findOne({name: req.body.name});
+        if (!user) return res.status(400).send('user name not found');
         //checking if the user email is allready in the database
         // const userEmail = await User.findOne({email: req.body.email});
         // if(!userEmail) return res.status(400).send('email not found');
         //check is password correct?
-        const validpass = await bcrypt.compare(req.body.password, userName.password);
+        const validpass = await bcrypt.compare(req.body.password, user.password);
         if(!validpass) return res.status(400).send('Invlaid password')
 
-        res.send('Logged in!')
+        //create and assing a token
+        const token = jwt.sign({_id: user._id}, process.env.TOKEN_SECRET);
+        res.header('auth-token', token).send(token);
+
+        // res.send('Logged in!')
 });
 
 module.exports = router;
