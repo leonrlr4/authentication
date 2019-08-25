@@ -44,11 +44,18 @@ router.post('/login', async (req, res)=>{
     //validate data before create a user
     const {error} = loginValidation(req.body);
     if (error) return res.status(400).send(error.details[0].message);
-        //checking if the emali is already in the database
-        const user = await User.findOne({email: req.body.email});
-        if (!user) return res.status(400).send('Email not found');
+        // const user = await User.findOne({email: req.body.email});
+        // if (!user) return res.status(400).send('email not found');
+
+        // console.log('whats happend')
+        //checking if the user name is already in the database
+        const userName = await User.findOne({name: req.body.name});
+        if (!userName) return res.status(400).send('user name not found');
+        //checking if the user email is allready in the database
+        // const userEmail = await User.findOne({email: req.body.email});
+        // if(!userEmail) return res.status(400).send('email not found');
         //check is password correct?
-        const validpass = await bcrypt.compare(req.body.password, user.password);
+        const validpass = await bcrypt.compare(req.body.password, userName.password);
         if(!validpass) return res.status(400).send('Invlaid password')
 
         res.send('Logged in!')
